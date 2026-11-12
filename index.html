@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Menu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Karantina:wght@400;700&family=Rubik:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* =====================================================================
+   THEME — edit only this block to re-theme the menu for a new client.
+   ===================================================================== */
+:root {
+  /* Colours */
+  --color-brand:        #0A2F8E;  /* header band, specials panel, titles, prices */
+  --color-brand-deep:   #071F63;  /* main text colour */
+  --color-page:         #E7EDF8;  /* page background (pale blue "paper") */
+  --color-on-brand:     #FFFFFF;  /* text on the blue header / panel */
+  --color-text-soft:    #34477A;  /* dish descriptions */
+  --color-rule:         rgba(10, 47, 142, 0.28);  /* lines and dotted leaders */
+  --color-rule-on-brand: rgba(255, 255, 255, 0.45);
+
+  /* Logo: these turn a dark logo on a white background into a white logo
+     on the blue band. Set both to "none" to show the logo in its own colours. */
+  --logo-filter: grayscale(1) invert(1) contrast(6);
+  --logo-blend:  screen;
+  --logo-width:  min(360px, 68vw);
+
+  /* Fonts */
+  --font-display: "Karantina", "Assistant", system-ui, sans-serif;  /* section titles */
+  --font-body:    "Assistant", system-ui, -apple-system, sans-serif; /* dishes, text */
+  --font-price:   "Rubik", "Assistant", system-ui, sans-serif;      /* prices */
+
+  /* Font sizes */
+  --size-name:      clamp(2.6rem, 9vw, 4.2rem);  /* restaurant name when there is no logo */
+  --size-section:   clamp(2.3rem, 7vw, 2.75rem);
+  --size-dish:      1.125rem;
+  --size-desc:      0.975rem;
+  --size-price:     1.05rem;
+  --size-tagline:   1.05rem;
+  --size-small:     0.875rem;
+
+  /* Spacing and shape */
+  --space-page:     clamp(16px, 4vw, 48px);  /* side margins */
+  --space-column:   3.25rem;                 /* gap between columns */
+  --space-section:  2.75rem;                 /* gap between sections */
+  --space-dish:     1rem;                    /* gap between dishes */
+  --max-width:      1180px;
+  --radius:         6px;
+}
+/* ===================================================================== */
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--color-page);
+  color: var(--color-brand-deep);
+  font-family: var(--font-body);
+  font-size: var(--size-dish);
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Header band ---------- */
+.masthead {
+  position: relative;
+  background: var(--color-brand);
+  color: var(--color-on-brand);
+  text-align: center;
+  padding: calc(4.25rem + env(safe-area-inset-top)) var(--space-page) 2.5rem;
+  isolation: isolate;
+}
+.masthead__logo {
+  display: block;
+  width: var(--logo-width);
+  height: auto;
+  margin: 0 auto;
+  filter: var(--logo-filter);
+  mix-blend-mode: var(--logo-blend);
+}
+.masthead__logo[hidden] { display: none; }
+.masthead__name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--size-name);
+  line-height: 0.95;
+  letter-spacing: 0.01em;
+}
+/* With a logo, the logo is the name: the text stays for screen readers only. */
+.has-logo .masthead__name {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.has-logo .masthead__tagline { margin-top: 1rem; }
+.masthead__tagline {
+  margin: 0.35rem auto 0;
+  max-width: 34rem;
+  font-size: var(--size-tagline);
+  opacity: 0.88;
+}
+.masthead__tagline:empty { display: none; }
+
+/* The bottom edge of the band: one thick and one thin white rule, like a printed menu. */
+.masthead::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  bottom: 8px;
+  height: 1px;
+  background: var(--color-rule-on-brand);
+}
+
+/* ---------- Language switch ---------- */
+.lang {
+  position: absolute;
+  top: calc(14px + env(safe-area-inset-top));
+  inset-inline-end: 14px;
+  display: inline-flex;
+  padding: 3px;
+  border: 1.5px solid var(--color-rule-on-brand);
+  border-radius: 999px;
+  direction: ltr;               /* always reads "עב | EN" */
+}
+.lang button {
+  min-width: 52px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-on-brand);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.lang button[aria-pressed="true"] {
+  background: var(--color-on-brand);
+  color: var(--color-brand);
+}
+.lang button:focus-visible {
+  outline: 2px solid var(--color-on-brand);
+  outline-offset: 2px;
+}
+
+/* ---------- Menu body ---------- */
+.menu {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 2.5rem var(--space-page) 1rem;
+}
+@media (min-width: 760px) { .menu { padding-top: 3.25rem; } }
+/* Wide screens: sections are dealt into 2–3 balanced columns by the script,
+   whole and in sheet order, with a thin rule between columns. */
+.menu--cols {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  column-gap: var(--space-column);
+  align-items: start;
+}
+.menu__col { position: relative; min-width: 0; }
+.menu__col + .menu__col::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: var(--space-section);
+  inset-inline-start: calc(var(--space-column) / -2);
+  width: 1px;
+  background: var(--color-rule);
+}
+
+.section {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  padding-bottom: var(--space-section);
+}
+.section__title {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin: 0 0 1.1rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--size-section);
+  line-height: 1;
+  color: var(--color-brand);
+}
+.section__title::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.45;
+  transform: translateY(-0.1em);
+}
+.section__title--blank { display: none; }
+
+.dishes { list-style: none; margin: 0; padding: 0; }
+.dish + .dish { margin-top: var(--space-dish); }
+
+.dish__line {
+  display: flex;
+  align-items: baseline;
+}
+.dish__name {
+  margin: 0;
+  font-size: var(--size-dish);
+  font-weight: 700;
+  line-height: 1.3;
+}
+.dish__leader {
+  flex: 1;
+  min-width: 1.25rem;
+  margin-inline: 0.5rem;
+  border-bottom: 2px dotted var(--color-rule);
+  position: relative;
+  top: -0.3em;
+}
+.dish__price {
+  font-family: var(--font-price);
+  font-weight: 600;
+  font-size: var(--size-price);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--color-brand);
+}
+.dish__price .cur { font-weight: 500; font-size: 0.85em; }
+.dish__desc {
+  margin: 0.15rem 0 0;
+  font-size: var(--size-desc);
+  line-height: 1.45;
+  color: var(--color-text-soft);
+  white-space: pre-line;
+  max-width: 34em;
+}
+.dish__tag {
+  display: block;
+  margin-bottom: 0.1rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+:lang(he) .dish__tag { letter-spacing: 0; font-size: 0.85rem; }
+
+/* ---------- Specials panel ---------- */
+.section--specials {
+  padding-bottom: var(--space-section);
+}
+.specials {
+  background: var(--color-brand);
+  color: var(--color-on-brand);
+  border-radius: var(--radius);
+  padding: 1.6rem 1.4rem 1.5rem;
+  outline: 1px solid var(--color-rule-on-brand);
+  outline-offset: -7px;
+}
+.specials .section__title { color: var(--color-on-brand); justify-content: center; }
+.specials .section__title::before,
+.specials .section__title::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.5;
+}
+.specials .dish__leader { border-bottom-color: var(--color-rule-on-brand); }
+.specials .dish__price,
+.specials .dish__desc { color: var(--color-on-brand); }
+.specials .dish__desc { opacity: 0.85; }
+
+/* ---------- Footer ---------- */
+.foot {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--space-page) calc(2.5rem + env(safe-area-inset-bottom));
+  text-align: center;
+  font-size: var(--size-small);
+  color: var(--color-text-soft);
+}
+.foot::before {
+  content: "";
+  display: block;
+  width: 3rem;
+  height: 2px;
+  margin: 0 auto 1rem;
+  background: var(--color-brand);
+}
+
+/* ---------- Loading state ---------- */
+.loading {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 4.5rem var(--space-page);
+  text-align: center;
+  color: var(--color-text-soft);
+  font-size: 1rem;
+}
+.loading__bar {
+  width: 120px;
+  height: 2px;
+  margin: 1rem auto 0;
+  background: var(--color-rule);
+  overflow: hidden;
+  position: relative;
+}
+.loading__bar::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  width: 40%;
+  background: var(--color-brand);
+  animation: slide 1.4s ease-in-out infinite;
+}
+@keyframes slide {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(260%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loading__bar::after { animation: none; width: 100%; opacity: 0.5; }
+}
+[hidden] { display: none !important; }
+
+@media print {
+  body { background: #fff; }
+  .lang { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="masthead" id="masthead">
+  <div class="lang" role="group" aria-label="Language / שפה">
+    <button type="button" data-lang="he" lang="he" aria-pressed="true">עב</button>
+    <button type="button" data-lang="en" lang="en" aria-pressed="false">EN</button>
+  </div>
+  <img class="masthead__logo" id="logo" src="logo.png" alt="" hidden>
+  <h1 class="masthead__name" id="name"></h1>
+  <p class="masthead__tagline" id="tagline"></p>
+</header>
+
+<div class="loading" id="loading" role="status">
+  <span id="loading-text"></span>
+  <div class="loading__bar" aria-hidden="true"></div>
+</div>
+
+<main class="menu" id="menu" hidden></main>
+<footer class="foot" id="foot" hidden></footer>
+
+<!-- Demo data: used until the Google Sheet links below are filled in, or if they can't be reached. -->
+<script type="text/csv" id="demo-menu">
+Category HE,Category EN,Name HE,Name EN,Description HE,Description EN,Price
+ארוחות בוקר,Breakfasts,ארוחת בוקר ישראלית,Israeli Breakfast,"שתי ביצים לבחירה, סלט קצוץ, מבחר גבינות, טחינה, לחם הבית ושתייה חמה","Two eggs any style, chopped salad, a selection of cheeses, tahini, house bread and a hot drink",72
+ארוחות בוקר,Breakfasts,שקשוקה,Shakshuka,"ביצים ברוטב עגבניות ופלפלים פיקנטי, טחינה ולחם הבית","Eggs poached in a spiced tomato and pepper sauce, with tahini and house bread",58
+ארוחות בוקר,Breakfasts,סביח בצלחת,Sabich Plate,"חציל מטוגן, ביצה קשה, עמבה, טחינה וסלט קצוץ, עם פיתה חמה","Fried eggplant, hard-boiled egg, amba, tahini and chopped salad, with warm pita",54
+ארוחות בוקר,Breakfasts,פרנץ' טוסט בריוש,Brioche French Toast,"מסקרפונה, פירות יער וסירופ מייפל","Mascarpone, mixed berries and maple syrup",52
+ארוחות בוקר,Breakfasts,יוגורט וגרנולה,Yogurt & Granola,"יוגורט עזים, גרנולה ביתית, דבש ופרי העונה","Goat's milk yogurt, house granola, honey and seasonal fruit",38
+פתיחים,Starters,לחם הבית,House Bread,"מחמצת חמה עם חמאה מלוחה, זיתים ומטבל עגבניות","Warm sourdough with salted butter, olives and tomato dip",24
+פתיחים,Starters,חציל על האש,Fire-Roasted Eggplant,"טחינה, יוגורט, שמן זית, צנוברים ועשבי תיבול","Tahini, yogurt, olive oil, pine nuts and fresh herbs",36
+פתיחים,Starters,פלאפל ירוק,Green Falafel,"שישה כדורים, טחינה ירוקה ופלפל חריף כבוש","Six falafel balls, green tahini and pickled hot pepper",32
+פתיחים,Starters,קרפצ'יו סלק,Beet Carpaccio,"גבינת עזים, אגוזי מלך, רוקט וויניגרט הדרים","Goat cheese, walnuts, rocket and citrus vinaigrette",42
+פתיחים,Starters,כבדי עוף מוקפצים,Sautéed Chicken Livers,"על פירה, עם בצל מקורמל וסילאן","On mashed potatoes, with caramelised onion and date syrup",46
+סלטים,Salads,סלט ירקות קצוץ,Chopped Israeli Salad,"עגבנייה, מלפפון, בצל סגול, פטרוזיליה, לימון ושמן זית, עם פטה","Tomato, cucumber, red onion, parsley, lemon and olive oil, topped with feta",44
+סלטים,Salads,פטוש,Fattoush,"ירקות קצוצים, פיתה קלויה, סומאק ורימונים","Chopped vegetables, toasted pita, sumac and pomegranate",48
+סלטים,Salads,סלט קינואה,Quinoa Salad,"קינואה, עדשים שחורות, בטטה צלויה, חמוציות ונענע","Quinoa, black lentils, roasted sweet potato, cranberries and mint",52
+סלטים,Salads,סלט חלומי,Halloumi Salad,"חלומי צלוי, עלי בייבי, ענבים, פקאן וויניגרט דבש וחרדל","Grilled halloumi, baby leaves, grapes, pecans and honey-mustard vinaigrette",58
+עיקריות,Mains,שניצל עוף,Chicken Schnitzel,"חזה עוף בפירורי לחם, עם צ'יפס או סלט ירוק","Breaded chicken breast, with fries or a green salad",68
+עיקריות,Mains,המבורגר הבית,House Burger,"250 גרם בקר טחון במקום, לחמניית בריוש, איולי וחמוצים, עם צ'יפס","250 g beef ground in-house, brioche bun, aioli and pickles, with fries",74
+עיקריות,Mains,קבב טלה,Lamb Kebab,"על הגריל, עם טחינה, בצל בסומאק, עגבנייה צלויה ופיתה","Grilled, with tahini, sumac onions, roasted tomato and pita",84
+עיקריות,Mains,פילה לברק,Sea Bass Fillet,"על ריזוטו לימון ואפונה, עם חמאת עשבים","On lemon and pea risotto, with herb butter",96
+עיקריות,Mains,פסטה עגבניות ובזיליקום,Tomato & Basil Pasta,"עגבניות שרי, שום, בזיליקום ופרמזן","Cherry tomatoes, garlic, basil and parmesan",56
+עיקריות,Mains,ניוקי בטטה,Sweet Potato Gnocchi,"חמאה ומרווה, אגוזי לוז ופקורינו","Sage butter, hazelnuts and pecorino",62
+קינוחים,Desserts,מלבי,Malabi,"פודינג חלב ומי ורדים, סירופ פטל, קוקוס ופיסטוק","Rosewater milk pudding, raspberry syrup, coconut and pistachio",32
+קינוחים,Desserts,עוגת שוקולד חמה,Warm Chocolate Cake,עם כדור גלידת וניל,With a scoop of vanilla ice cream,42
+קינוחים,Desserts,קנאפה,Knafeh,"גבינה מתוקה, קדאיף וסירופ מי זהר","Sweet cheese, kadaif pastry and orange-blossom syrup",44
+קינוחים,Desserts,עוגת גבינה אפויה,Baked Cheesecake,עם רוטב פירות יער,With a mixed-berry sauce,38
+שתייה,Drinks,אספרסו,Espresso,קצר או כפול,Single or double,10
+שתייה,Drinks,הפוך,Cappuccino,קטן / גדול,Small / large,14 / 17
+שתייה,Drinks,תה נענע,Mint Tea,"שחור או צמחים, עם נענע טרייה","Black or herbal, with fresh mint",14
+שתייה,Drinks,לימונענע,Limonana,לימונדה גרוסה עם נענע,Frozen lemonade with mint,18
+שתייה,Drinks,מיץ תפוזים סחוט,Fresh Orange Juice,סחוט במקום,Freshly squeezed,18
+שתייה,Drinks,בירה מהחבית,Draft Beer,חצי ליטר,Half a litre,32
+שתייה,Drinks,כוס יין,Glass of Wine,"אדום או לבן מיקב ישראלי, שאלו על המבחר","Red or white from an Israeli winery — ask about today's selection",38
+</script>
+<script type="text/csv" id="demo-specials">
+Category HE,Category EN,Name HE,Name EN,Description HE,Description EN,Price
+ארוחות בוקר,Breakfasts,שקשוקת חצילים,Eggplant Shakshuka,"חציל קלוי, פטה ושום קונפי, עם לחם הבית","Roasted eggplant, feta and garlic confit, with house bread",62
+עיקריות,Mains,דג היום,Catch of the Day,"דג טרי מהשוק על הגריל, עם ירקות שורש צלויים","Fresh market fish from the grill, with roasted root vegetables",98
+,,פאי תפוחים חם,Warm Apple Pie,"עם קרם אנגלז וקינמון","With crème anglaise and cinnamon",36
+</script>
+<script type="text/csv" id="demo-settings">
+Key,Value
+restaurant_name_he,איטס
+restaurant_name_en,Eats
+tagline_he,קפה וביסטרו שכונתי · מטבח פתוח מהבוקר
+tagline_en,Neighbourhood café & bistro · Kitchen open from morning
+</script>
+
+<script>
+/* =====================================================================
+   GOOGLE SHEET LINKS — paste the "Publish to web" CSV link of each tab.
+   Leave a link empty ("") to use the built-in demo data.
+   ===================================================================== */
+const MENU_CSV_URL     = "";
+const SPECIALS_CSV_URL = "";
+const SETTINGS_CSV_URL = "";
+/* ===================================================================== */
+
+(function () {
+  "use strict";
+
+  const FETCH_TIMEOUT_MS = 9000;
+  const LANG_KEY  = "menu-lang";
+  const CACHE_KEY = "menu-last-good-v1";
+
+  const UI = {
+    he: { specials: "מנות מיוחדות", loading: "טוען את התפריט", footer: "המחירים בשקלים וכוללים מע״מ", currency: "₪" },
+    en: { specials: "Specials",     loading: "Loading the menu", footer: "Prices in shekels, VAT included",  currency: "₪" }
+  };
+
+  /* ---------- storage (never breaks the page) ---------- */
+  function store(key, value) {
+    try {
+      if (value === undefined) return localStorage.getItem(key);
+      localStorage.setItem(key, value);
+    } catch (e) { return null; }
+  }
+
+  /* ---------- CSV parser: quotes, commas and line breaks inside cells ---------- */
+  function parseCSV(text) {
+    text = String(text || "").replace(/^﻿/, "");
+    const rows = [];
+    let row = [], cell = "", inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (inQuotes) {
+        if (c === '"') {
+          if (text[i + 1] === '"') { cell += '"'; i++; }
+          else inQuotes = false;
+        } else cell += c;
+      } else if (c === '"') {
+        inQuotes = true;
+      } else if (c === ",") {
+        row.push(cell); cell = "";
+      } else if (c === "\n" || c === "\r") {
+        if (c === "\r" && text[i + 1] === "\n") i++;
+        row.push(cell); rows.push(row); row = []; cell = "";
+      } else cell += c;
+    }
+    if (cell !== "" || row.length) { row.push(cell); rows.push(row); }
+    return rows
+      .map(r => r.map(v => v.trim()))
+      .filter(r => r.some(v => v !== ""));
+  }
+
+  /* ---------- turn sheet rows into dishes ---------- */
+  const norm = s => String(s || "").toLowerCase().replace(/[^a-z֐-׿]/g, "");
+  const COLUMNS = {
+    catHe:  ["categoryhe", "קטגוריה"],
+    catEn:  ["categoryen"],
+    nameHe: ["namehe", "שם", "שםמנה"],
+    nameEn: ["nameen"],
+    descHe: ["descriptionhe", "deschebrew", "תיאור"],
+    descEn: ["descriptionen", "descen"],
+    price:  ["price", "מחיר"]
+  };
+  const FALLBACK_ORDER = ["catHe", "catEn", "nameHe", "nameEn", "descHe", "descEn", "price"];
+
+  function toDishes(rows) {
+    if (!rows.length) return [];
+    const header = rows[0].map(norm);
+    const idx = {};
+    let found = 0;
+    for (const key in COLUMNS) {
+      const i = header.findIndex(h => COLUMNS[key].includes(h));
+      if (i !== -1) { idx[key] = i; found++; }
+    }
+    let body = rows.slice(1);
+    if (found < 3) {                        // no recognisable header: read columns by position
+      FALLBACK_ORDER.forEach((k, i) => idx[k] = i);
+      body = rows;
+    }
+    const get = (r, k) => (idx[k] !== undefined ? (r[idx[k]] || "") : "");
+    return body
+      .map(r => ({
+        cat:   { he: get(r, "catHe"),  en: get(r, "catEn") },
+        name:  { he: get(r, "nameHe"), en: get(r, "nameEn") },
+        desc:  { he: get(r, "descHe"), en: get(r, "descEn") },
+        price: get(r, "price")
+      }))
+      .filter(d => d.name.he || d.name.en);
+  }
+
+  function toSettings(rows) {
+    const out = {};
+    rows.forEach(r => {
+      const k = String(r[0] || "").toLowerCase().trim().replace(/\s+/g, "_");
+      if (k && k !== "key") out[k] = r[1] || "";
+    });
+    return out;
+  }
+
+  /* ---------- fetching ---------- */
+  async function fetchCSV(url) {
+    url = String(url || "").trim();
+    if (!url) throw new Error("no url");
+    const busted = url + (url.includes("?") ? "&" : "?") + "t=" + Date.now();
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
+    try {
+      const res = await fetch(busted, { cache: "no-store", signal: ctrl.signal });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const text = await res.text();
+      if (/^\s*<(!doctype|html)/i.test(text)) throw new Error("not a CSV (is the tab published as CSV?)");
+      return text;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  const demo = id => document.getElementById(id).textContent.replace(/^\n/, "");
+
+  async function loadData() {
+    const demoData = { menu: demo("demo-menu"), specials: demo("demo-specials"), settings: demo("demo-settings") };
+    if (!MENU_CSV_URL.trim()) return demoData;
+
+    let cached = null;
+    try { cached = JSON.parse(store(CACHE_KEY) || "null"); } catch (e) { cached = null; }
+
+    const [menu, specials, settings] = await Promise.allSettled([
+      fetchCSV(MENU_CSV_URL),
+      SPECIALS_CSV_URL.trim() ? fetchCSV(SPECIALS_CSV_URL) : Promise.resolve(""),
+      SETTINGS_CSV_URL.trim() ? fetchCSV(SETTINGS_CSV_URL) : Promise.resolve(null)
+    ]);
+
+    if (menu.status !== "fulfilled") {
+      console.warn("Menu sheet could not be loaded:", menu.reason);
+      return cached || demoData;
+    }
+    const data = {
+      menu: menu.value,
+      specials: specials.status === "fulfilled" ? specials.value : (cached ? cached.specials : ""),
+      settings: settings.status === "fulfilled" && settings.value !== null
+        ? settings.value
+        : (cached ? cached.settings : demoData.settings)
+    };
+    store(CACHE_KEY, JSON.stringify(data));
+    return data;
+  }
+
+  /* ---------- rendering ---------- */
+  let state = null;
+  let lang = store(LANG_KEY) === "en" ? "en" : "he";
+
+  const pick = (pair) => (lang === "en" ? (pair.en || pair.he) : (pair.he || pair.en));
+
+  function el(tag, cls, text) {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text) n.textContent = text;
+    return n;
+  }
+
+  function priceNode(raw) {
+    const p = String(raw || "").trim();
+    if (!p) return null;
+    const span = el("span", "dish__price");
+    if (/^[\d\s.,/\-–]+$/.test(p)) {          // plain numbers: add the ₪ sign
+      const cur = el("span", "cur", UI[lang].currency);
+      const num = document.createTextNode(p);
+      if (lang === "he") { span.append(num, " ", cur); }
+      else               { span.append(cur, num); }
+    } else {
+      span.textContent = p;                    // written by hand, show as is
+    }
+    return span;
+  }
+
+  function dishNode(d, showTag) {
+    const li = el("li", "dish");
+    if (showTag) {
+      const tag = pick(d.cat);
+      if (tag) li.append(el("span", "dish__tag", tag));
+    }
+    const line = el("div", "dish__line");
+    line.append(el("h3", "dish__name", pick(d.name)));
+    const price = priceNode(d.price);
+    if (price) line.append(el("span", "dish__leader"), price);
+    li.append(line);
+    const desc = pick(d.desc);
+    if (desc) li.append(el("p", "dish__desc", desc));
+    return li;
+  }
+
+  function sectionNode(title, dishes, extraClass, showTags) {
+    const sec = el("section", "section" + (extraClass ? " " + extraClass : ""));
+    const h = el("h2", "section__title" + (title ? "" : " section__title--blank"), title);
+    const ul = el("ul", "dishes");
+    dishes.forEach(d => ul.append(dishNode(d, showTags)));
+    sec.append(h, ul);
+    return sec;
+  }
+
+  function groupByCategory(dishes) {
+    const groups = new Map();
+    dishes.forEach(d => {
+      const key = (d.cat.he + "|" + d.cat.en).toLowerCase();
+      if (!groups.has(key)) groups.set(key, { cat: d.cat, dishes: [] });
+      groups.get(key).dishes.push(d);
+    });
+    return [...groups.values()];
+  }
+
+  function render() {
+    const t = UI[lang];
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === "he" ? "rtl" : "ltr";
+    document.querySelectorAll(".lang button").forEach(b =>
+      b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
+    document.getElementById("loading-text").textContent = t.loading;
+
+    if (!state) return;
+    const s = state.settings;
+    const name = (lang === "en" ? (s.restaurant_name_en || s.restaurant_name_he) : (s.restaurant_name_he || s.restaurant_name_en)) || "";
+    const tagline = (lang === "en" ? (s.tagline_en || s.tagline_he) : (s.tagline_he || s.tagline_en)) || "";
+    document.getElementById("name").textContent = name;
+    document.getElementById("tagline").textContent = tagline;
+    document.getElementById("logo").alt = name;
+    document.title = name ? name + (lang === "en" ? " — Menu" : " — תפריט") : (lang === "en" ? "Menu" : "תפריט");
+
+    const menu = document.getElementById("menu");
+    menu.replaceChildren();
+
+    if (state.specials.length) {
+      const sec = sectionNode(t.specials, state.specials, "section--specials", true);
+      const panel = el("div", "specials");
+      panel.append(...sec.childNodes);
+      sec.append(panel);
+      menu.append(sec);
+    }
+    groupByCategory(state.menu).forEach(g => menu.append(sectionNode(pick(g.cat), g.dishes)));
+
+    const foot = document.getElementById("foot");
+    foot.textContent = t.footer;
+
+    document.getElementById("loading").hidden = true;
+    menu.hidden = false;
+    foot.hidden = false;
+    layoutColumns(true);
+  }
+
+  /* ---------- columns: split sections into balanced columns, keeping order ---------- */
+  let currentCols = 0;
+  function columnCount() {
+    const w = window.innerWidth;
+    return w >= 1120 ? 3 : w >= 760 ? 2 : 1;
+  }
+  function layoutColumns(force) {
+    const menu = document.getElementById("menu");
+    const k = columnCount();
+    if (!force && k === currentCols) return;
+    currentCols = k;
+    const sections = [...menu.querySelectorAll(".section")];
+    menu.replaceChildren();
+    if (k === 1 || sections.length < 2) {
+      menu.classList.remove("menu--cols");
+      menu.append(...sections);
+      return;
+    }
+    menu.classList.add("menu--cols");
+    menu.style.setProperty("--cols", k);
+    const cols = Array.from({ length: k }, () => el("div", "menu__col"));
+    menu.append(...cols);
+    cols[0].append(...sections);                       // measure at column width
+    const h = sections.map(s => s.getBoundingClientRect().height);
+    // best split of the sections into k runs (in order) with the shortest tallest column
+    const n = h.length, pre = [0];
+    h.forEach((v, i) => pre.push(pre[i] + v));
+    const best = Array.from({ length: k + 1 }, () => Array(n + 1).fill(Infinity));
+    const cut  = Array.from({ length: k + 1 }, () => Array(n + 1).fill(0));
+    best[0][0] = 0;
+    for (let c = 1; c <= k; c++)
+      for (let i = 0; i <= n; i++)
+        for (let j = 0; j <= i; j++) {
+          const v = Math.max(best[c - 1][j], pre[i] - pre[j]);
+          if (v < best[c][i]) { best[c][i] = v; cut[c][i] = j; }
+        }
+    let end = n;
+    for (let c = k; c >= 1; c--) {
+      const start = cut[c][end];
+      cols[c - 1].append(...sections.slice(start, end));
+      end = start;
+    }
+  }
+  let resizeTimer;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => layoutColumns(false), 120);
+  });
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => { if (state) layoutColumns(true); });
+  }
+
+  /* ---------- logo: shown only if logo.png exists ---------- */
+  const logo = document.getElementById("logo");
+  const showLogo = () => { logo.hidden = false; document.getElementById("masthead").classList.add("has-logo"); };
+  logo.addEventListener("load", showLogo);
+  logo.addEventListener("error", () => logo.remove());
+  if (logo.complete && logo.naturalWidth) showLogo();
+
+  /* ---------- language switch ---------- */
+  document.querySelectorAll(".lang button").forEach(b => b.addEventListener("click", () => {
+    if (lang === b.dataset.lang) return;
+    lang = b.dataset.lang;
+    store(LANG_KEY, lang);
+    render();
+  }));
+
+  render();   // sets language + loading text immediately
+
+  function setData(raw) {
+    state = {
+      menu: toDishes(parseCSV(raw.menu)),
+      specials: toDishes(parseCSV(raw.specials || "")),
+      settings: toSettings(parseCSV(raw.settings || ""))
+    };
+    render();
+  }
+
+  loadData()
+    .then(raw => {
+      setData(raw);
+      if (!state.menu.length) throw new Error("menu sheet is empty");
+    })
+    .catch(err => {
+      console.warn("Showing demo menu:", err);
+      setData({ menu: demo("demo-menu"), specials: demo("demo-specials"), settings: demo("demo-settings") });
+    });
+
+  window.__menuTest = setData;  // used only for checking layouts
+})();
+</script>
+</body>
+</html>
